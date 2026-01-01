@@ -22,6 +22,8 @@ function resetGame() {
   console.log("Resetting game...");
   // Update the global gameData variable (remove 'const' from inside here)
   chainIndex++;
+  document.getElementById('record-message').innerText = '';
+
   if (chainIndex >= shuffledChains.length) {
     shuffledChains = [...wordChains].sort(() => Math.random() - 0.5);
     chainIndex = 0;
@@ -57,6 +59,15 @@ function renderBoard() {
     gameData.forEach((word, index) => {
         const div = document.createElement('div');
         div.className = 'word-row';
+
+        const isInvisible = 
+          index === 0 ||
+          index === gameData.length - 1 ||
+          Math.abs(index - currentTargetIndex) <= 1;
+
+        if (!isInvisible) {
+          return;
+        }
         
         if (index === 0 || index === gameData.length - 1 || index < currentTargetIndex) {
             // Words the player has already solved or the start/end hints
@@ -68,6 +79,10 @@ function renderBoard() {
             const displayed = word.substring(0, revealedCount);
             const hidden = "_".repeat(word.length - revealedCount);
             div.innerText = displayed + hidden;
+
+            setTimeout(() => {
+              div.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
         } else {
             // Words further down the chain that aren't reachable yet
             div.innerText = "???";
@@ -78,30 +93,34 @@ function renderBoard() {
 
 function startTimer() {
   clearInterval(timerInterval);
-    const timerDisplay = document.getElementById('timer-display');
-    
-    timerDisplay.classList.remove('low-time');
+  timeLeft = 60;
 
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timerDisplay) {
-            timerDisplay.innerText = `Time: ${timeLeft}s`;
-        }
-
+  timerInterval = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showEndScreen("Time's up!", "Better luck next time.");
+        return;
+      }
+      timeLeft--;
+      
+      const timerDisplay = document.getElementById('timer-display');
+      if (timerDisplay) {
+        timerDisplay.innerText = `Time: ${timeLeft}s`;
+        
         if (timeLeft <= 10) {
           timerDisplay.classList.add('low-time');
         } else {
           timerDisplay.classList.remove('low-time');
         }
-        
-        if (timeLeft <= 0) {
-          showEndScreen("Time's up!", "Better luck next time.");
-        }
-    }, 1000);
+      }
+  }, 1000);
 }
 
 function showEndScreen(title, message) {
     clearInterval(timerInterval);
+    const endScreen = document.getElementById('end-screen');
+    endScreen.style.display = 'flex';
+
     document.getElementById('end-screen').style.display = 'flex';
     document.getElementById('end-title').innerText = title;
     document.getElementById('end-message').innerText = message;
@@ -114,7 +133,6 @@ function showEndScreen(title, message) {
         spread: 70,
         origin: { y: 0.6 },
         colors: ['#3498db', '#27ae60', '#f1c40f'],
-        zIndex: 999
       });
     }
   }
@@ -126,11 +144,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('guess-input');
     const startBtn = document.getElementById('start-button');
     const overlay = document.getElementById('overlay');
+    const endScreen = document.getElementById('end-screen');
+
+    overlay.style.display = 'flex';
+    endScreen.style.display = 'none';
 
     // Initial draw
     renderBoard();
+    updateBestTimeDisplay();
+
+    // Start button logic
     startBtn.addEventListener('click', () => {
+        console.log("Starting game...");
         overlay.style.display = 'none';
+        timeLeft = 60;
         startTimer();
         input.focus();
     });

@@ -6,190 +6,177 @@
   --bg: #f8f9fa;
 }
 
-body {
+/* 1. Reset & Global Layout */
+html, body {
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   background-color: var(--bg);
   font-family: "Segoe UI", sans-serif;
-  margin: 0;
+}
+
+body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100svh;
-  padding: 20px;
-  box-sizing: border-box;
 }
 
+/* 2. Main Container */
 .game-wrapper {
   width: 100%;
   max-width: 500px;
+  height: 100svh; /* Small Viewport Height is best for mobile */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 15px;
+  justify-content: space-between;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+/* 3. Header & Stats */
+header {
+  text-align: center;
+  padding-bottom: 10px;
 }
 
 #timer-display {
   font-size: 2rem;
   font-weight: bold;
   color: var(--primary);
-  margin-bottom: 20px;
+  margin: 5px 0;
+}
+
+#best-time-display {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* 4. The Word Board (The middle section) */
+#game-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* We handle centering via JS scrollIntoView */
+  width: 100%;
 }
 
 .word-row {
   background: white;
-  margin: 10px 0;
-  padding: 15px;
+  width: 90%;
+  margin: 8px 0;
+  padding: 12px;
   border-radius: 8px;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
   letter-spacing: 2px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-align: center;
-  display: block;
+  transition: all 0.3s ease;
 }
 
 .hidden-word {
   color: var(--accent);
   border: 2px dashed var(--accent);
+  background: transparent;
   letter-spacing: 4px;
-  text-align: center;
 }
 
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  padding: 20px;
-}
-
-.modal {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.modal h2 {
-  margin: 0;
-  padding-bottom: 15px;
-  font-size: 1.8rem;
-  color: var(--primary);
-}
-
-.modal p {
-  margin: 0;
-  padding-bottom: 20px;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background: #2980b9;
-}
-
-header, #game-board, .modal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+/* 5. Input Area (Pinned to bottom) */
+.input-area {
+  padding-bottom: env(safe-area-inset-bottom); /* Fix for iPhones with notches */
 }
 
 input {
   width: 100%;
   padding: 15px;
-  font-size: 16px;
+  font-size: 16px; /* 16px prevents iOS auto-zoom */
   border: 2px solid #ddd;
   border-radius: 8px;
   box-sizing: border-box;
+  text-transform: uppercase;
 }
 
 input:focus {
+  outline: none;
   border-color: var(--accent);
 }
 
-@media (max-width: 600px) {
-  body {
-    align-items: flex-start;
-    padding-top: 10svh;
-  }
-
-  input {
-    font-size: 16px;
-  }
-
-  .word-row {
-    font-size: 1.1rem;
-    padding: 12px;
-    letter-spacing: 1px;;
-  }
-
-  #timer-display {
-    font-size: 1.5rem;
-  }
-
-  .modal {
-    width: 80%;
-    padding: 20px;
-  }
+#hint-text {
+  font-size: 0.8rem;
+  text-align: center;
+  opacity: 0.6;
+  margin-top: 8px;
 }
 
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  50% { transform: translateX(10px); }
-  75% { transform: translateX(-10px); }
-  100% { transform: translateX(0); }
+/* 6. Modals & Overlays */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100svh;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+/* Specific visibility controls */
+#overlay { display: flex; }
+#end-screen { display: none; }
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 85%;
+  max-width: 380px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+#record-message:empty { display: none; }
+#record-message {
+  font-weight: bold;
+  color: var(--success);
+  margin-bottom: 10px;
+}
+
+/* 7. Animations & States */
+button {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
 }
 
 .shake {
   animation: shake 0.3s ease-in-out;
   border-color: var(--error) !important;
-  background-color: #fee;
 }
 
 .low-time {
-  color: #e74c3c !important;
+  color: var(--error) !important;
   animation: pulse 0.8s infinite ease-in-out;
-  display: inline-block;
 }
 
-#best-time-display {
-  font-size: 1.2rem;
-  opacity: 0.8;
-  margin-bottom: 10px;
-  color: var(--primary);
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
 }
 
-#record-message:empty {
-  display: none;
-}
-
-#record-message {
-  font-size: bold;
-  color: var(--success);
-  margin-top: 10px 0;
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }

@@ -1,0 +1,137 @@
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db
+  --error: #e74c3c;
+  --success: #27ae60;
+  --bg: #f8f9fa;
+}
+
+body {
+  background-color: var(--bg);
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.game-wrapper {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+#timer-display {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--error);
+  margin-bottom: 20px;
+}
+
+.word-row {
+  background: white;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.hidden-word {
+  color: var(--accent);
+  border: 2px dashed var(--accent);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background: var(--accent);
+  color: green;
+  border: none;
+  border-radius: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;;
+}
+
+input:focus {
+  border-color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .word-row {
+    font-size: 1.1rem;
+    padding: 10px;
+    letter-spacing: 1px;;
+  }
+
+  #timer-display {
+    font-size: 1.5rem;
+  }
+
+  .modal {
+    width: 80%;
+    padding: 20px;
+  }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.shake {
+  animation: shake 0.3s ease-in-out;
+  border-color: var(--error) !important;
+  background-color: #fee;
+}
+
+.low-time {
+  color: #e74c3c !important;
+  animation: pulse 0.8s infinite ease-in-out;
+  display: inline-block;
+}
+
+#best-time-display {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  margin-bottom: 10px;
+  color: var(--primary);
+}

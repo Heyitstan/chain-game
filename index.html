@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chain Race | Word Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-wrapper">
+
+    <div id="overlay" class="overlay">
+      <div class="modal">
+        <h1>Chain Race</h1>
+        <p>Connect the words to complete the chain.</p>
+        <button id="start-button">Start Game</button>
+      </div>
+    </div>
+
+    <div id="end-screen" class="overlay" style="display: none;">
+      <div class="modal">
+        <h2 id="end-title">Game Over!</h2>
+        <p id="record-message" style="color: #27ae60; font-weight: bold;"></p>
+        <p id="end-message"></p>
+        <button id="restart-button" onclick="resetGame()">Play Again</button>
+      </div>
+    </div>
+
+    <header>
+          </h1>
+        <h1>Chain Race</h1>
+          <div id="timer-display">00:00</div>     
+          <div id="best-time-display">Best Time: --:--</div>
+    </header>
+    
+    <main id="game-board">
+      </main>
+
+      <section class="input-area">
+        <input type="text" id="guess-input" placeholder="Enter your guess..." autocomplete="off" />
+        <p id="hint-text">Press Enter to guess. Wrong guesses reveal a letter but cost time!</p>
+      </section>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 :root {
   --primary: #2c3e50;
-  --accent: #3498db
+  --accent: #3498db;
   --error: #e74c3c;
   --success: #27ae60;
   --bg: #f8f9fa;
@@ -9,21 +9,28 @@
 body {
   background-color: var(--bg);
   font-family: "Segoe UI", sans-serif;
+  margin: 0;
   display: flex;
   justify-content: center;
+  align-items: center;
+  min-height: 100svh;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .game-wrapper {
   width: 100%;
   max-width: 500px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 15px;
 }
 
 #timer-display {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--error);
+  color: var(--primary);
   margin-bottom: 20px;
 }
 
@@ -36,11 +43,15 @@ body {
   font-weight: bold;
   letter-spacing: 2px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: block;
 }
 
 .hidden-word {
   color: var(--accent);
   border: 2px dashed var(--accent);
+  letter-spacing: 4px;
+  text-align: center;
 }
 
 .overlay {
@@ -54,6 +65,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 100;
+  padding: 20px;
 }
 
 .modal {
@@ -61,6 +73,21 @@ body {
   padding: 30px;
   border-radius: 10px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal h2 {
+  margin: 0;
+  padding-bottom: 15px;
+  font-size: 1.8rem;
+  color: var(--primary);
+}
+
+.modal p {
+  margin: 0;
+  padding-bottom: 20px;
 }
 
 button {
@@ -68,18 +95,30 @@ button {
   font-size: 1.2rem;
   cursor: pointer;
   background: var(--accent);
-  color: green;
+  color: white;
   border: none;
   border-radius: 5px;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #2980b9;
+}
+
+header, #game-board, .modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 input {
   width: 100%;
   padding: 15px;
-  font-size: 1.2rem;
+  font-size: 16px;
   border: 2px solid #ddd;
   border-radius: 8px;
-  outline: none;;
+  box-sizing: border-box;
 }
 
 input:focus {
@@ -87,9 +126,18 @@ input:focus {
 }
 
 @media (max-width: 600px) {
+  body {
+    align-items: flex-start;
+    padding-top: 10svh;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
   .word-row {
     font-size: 1.1rem;
-    padding: 10px;
+    padding: 12px;
     letter-spacing: 1px;;
   }
 
@@ -134,4 +182,14 @@ input:focus {
   opacity: 0.8;
   margin-bottom: 10px;
   color: var(--primary);
+}
+
+#record-message:empty {
+  display: none;
+}
+
+#record-message {
+  font-size: bold;
+  color: var(--success);
+  margin-top: 10px 0;
 }

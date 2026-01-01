@@ -206,6 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+function keepInput
+
 function updateBestTimeDisplay() {
   const bestTime = localStorage.getItem('bestTime');
   const display = document.getElementById('best-time-display');

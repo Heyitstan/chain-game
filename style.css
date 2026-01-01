@@ -63,12 +63,15 @@ header {
   align-items: center;
   overflow: hidden; /* We handle centering via JS scrollIntoView */
   width: 100%;
+  overflow-y: auto;
+  padding-bottom: 50vh;
+  scroll-behavior: smooth;
 }
 
 .word-row {
   background: white;
   width: 90%;
-  margin: 8px 0;
+  margin: 10px 0;
   padding: 12px;
   border-radius: 8px;
   font-size: 1.3rem;
@@ -77,6 +80,9 @@ header {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-align: center;
   transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .hidden-word {
@@ -124,7 +130,7 @@ input:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: 1000;
 }
 
 /* Specific visibility controls */

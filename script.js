@@ -59,30 +59,25 @@ function renderBoard() {
     gameData.forEach((word, index) => {
         const div = document.createElement('div');
         div.className = 'word-row';
-
-        const isInvisible = 
-          index === 0 ||
-          index === gameData.length - 1 ||
-          Math.abs(index - currentTargetIndex) <= 1;
-
-        if (isInvisible) {
-          return;
-        }
         
+        if (index === currentTargetIndex - 1) {
+            div.classList.add('sourced-word');
+        }
+
         if (index === 0 || index === gameData.length - 1 || index < currentTargetIndex) {
             // Words the player has already solved or the start/end hints
             div.innerText = word;
+            if (index === 0) {
+                div.classList.add('start-word');
+            }
         } else if (index === currentTargetIndex) {
             // The word the player is currently guessing
             div.classList.add('hidden-word');
+            div.id = 'active-word-row';
             // Show revealed letters and underscores for the rest
             const displayed = word.substring(0, revealedCount);
             const hidden = "_".repeat(word.length - revealedCount);
             div.innerText = displayed + hidden;
-
-            setTimeout(() => {
-              div.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 50);
         } else {
             // Words further down the chain that aren't reachable yet
             div.innerText = "???";
@@ -134,6 +129,7 @@ function showEndScreen(title, message) {
         spread: 70,
         origin: { y: 0.6 },
         colors: ['#3498db', '#27ae60', '#f1c40f'],
+        zIndex: 2000
       });
     }
   }
@@ -169,28 +165,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const guess = input.value.toUpperCase().trim();
             const actual = gameData[currentTargetIndex];
 
+            if (guess === '') return; // Ignore empty guesses
+
             if (guess === actual) {
                 // Correct! Move to next word
-                currentTargetIndex++;
-                revealedCount = 1;
+                const activeRow = document.getElementById('active-word-row');
+                if (activeRow) activeRow.classList.add('correct-word');
                 
-                // Check if they finished the list
-                if (currentTargetIndex === gameData.length - 1) {
-                    renderBoard();
-                    clearInterval(timerInterval);
+                input.value = '';
 
-                    const previousBest = localStorage.getItem('bestTime');
-                    let recordText = "";
-                    
-                    if (!previousBest || timeLeft > parseInt(previousBest)) {
-                      localStorage.setItem('bestTime', timeLeft);
-                      recordText = "New Personal Best!";
-                      updateBestTimeDisplay();
-                    }
-                    document.getElementById('record-message').innerText = recordText;
-                    showEndScreen("Congratulations!", `You've completed the word chain with ${timeLeft}s left!`)
-                    return;
-                }
+                setTimeout(() => {
+                  currentTargetIndex++;
+                  revealedCount = 1;
+                  renderBoard();
+                  if (currentTargetIndex === gameData.length - 1) {
+                      clearInterval(timerInterval);
+                      handleWin();
+                  }
+                }, 300);
             } else {
                 // Wrong! Reveal a letter and penalize time
                 input.classList.add('shake');
@@ -207,16 +199,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+function handleWin() {
+  console.log("Player completed the chain!");
+  const previousBest = localStorage.getItem('bestTime');
+  let recordText = "";
+
+  if(!previousBest || timeLeft > parseInt(previousBest)) {
+    localStorage.setItem('bestTime', timeLeft);
+    recordText = "New Personal Best!";
+    updateBestTimeDisplay();
+  }
+
+  document.getElementById('record-message').innerText = recordText;
+  showEndScreen("Congratulations!", `You completed the chain with ${timeLeft}s left!`);
+}
+
 function scrollToActiveWord() {
-  const activeRow = document.getElementById('active-word');
-  if (activeRow) {
+  const activeRow = document.querySelector('.hidden-word');
+  const board = document.getElementById('game-board');
+  
+  if (activeRow && board) {
     const previousRow = activeRow.previousElementSibling;
     const target = previousRow || activeRow;
 
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    const targetOffset = target.offsetTop - board.offsetTop;
+    board.scrollTo({
+      top: targetOffset - 10,
+      behavior: 'smooth'
+    })
   }
 }
 
@@ -231,3 +241,9 @@ function updateBestTimeDisplay() {
 }
 
 updateBestTimeDisplay();
+
+window.addEventListener('resize', () => {
+  if (document.activeElement.id === 'guess-input') {
+    scrollToActiveWord();
+  }
+});

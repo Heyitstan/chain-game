@@ -106,6 +106,17 @@ function showEndScreen(title, message) {
     document.getElementById('end-title').innerText = title;
     document.getElementById('end-message').innerText = message;
     document.getElementById('guess-input').blur();
+
+    if (title === "Congratulations!") {
+      console.log("Triggering confetti animation...");
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#3498db', '#27ae60', '#f1c40f'],
+        zIndex: 999
+      });
+    }
   }
 
 // 3. The "Initialization" - This waits for the HTML to be ready

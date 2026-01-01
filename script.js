@@ -65,7 +65,7 @@ function renderBoard() {
           index === gameData.length - 1 ||
           Math.abs(index - currentTargetIndex) <= 1;
 
-        if (!isInvisible) {
+        if (isInvisible) {
           return;
         }
         
@@ -89,6 +89,7 @@ function renderBoard() {
         }
         board.appendChild(div);
     });
+    setTimeout(scrollToActiveWord, 100);
 }
 
 function startTimer() {
@@ -206,7 +207,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function keepInput
+function scrollToActiveWord() {
+  const activeRow = document.getElementById('active-word');
+  if (activeRow) {
+    const previousRow = activeRow.previousElementSibling;
+    const target = previousRow || activeRow;
+
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
 
 function updateBestTimeDisplay() {
   const bestTime = localStorage.getItem('bestTime');

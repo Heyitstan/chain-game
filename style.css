@@ -68,13 +68,17 @@ header {
   scroll-behavior: smooth;
 }
 
+#game-container {
+  padding-top: 5px;
+}
+
 .word-row {
   background: white;
   width: 90%;
   margin: 10px 0;
   padding: 12px;
   border-radius: 8px;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: bold;
   letter-spacing: 2px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -83,6 +87,7 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 40px;
 }
 
 .hidden-word {
@@ -169,6 +174,22 @@ button {
 .shake {
   animation: shake 0.3s ease-in-out;
   border-color: var(--error) !important;
+}
+
+#timer {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+#timer-container {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  z-index: 100;
+  padding: 10px 0;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .low-time {

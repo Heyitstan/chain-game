@@ -1,8 +1,8 @@
 :root {
-  --primary: #2c3e50;
-  --accent: #3498db;
+  --primary: #3498db;
+  --accent: #f1c40f;
   --error: #e74c3c;
-  --success: #27ae60;
+  --success: #2ecc71;
   --bg: #f8f9fa;
 }
 
@@ -204,3 +204,144 @@ button {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
 }
+
+.active-guess-container {
+  border: 2px solid var(--accent);
+  background: #fff;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.inline-guess-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  padding: 12px;
+  color: var(--accent);
+  outline: none;
+  background: transparent;
+}
+
+.inline-guess-input::placeholder {
+  color: #bdc3c7;
+  letter-spacing: 4px;
+}
+
+.input-area {
+  display: none;
+}
+
+/* Container for the slots */
+.active-guess-row {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    background: transparent !important
+}
+
+.master-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: text;
+    z-index: 10;
+}
+
+/* Individual Boxes */
+.letter-slot {
+    width: 45px;
+    height: 50px;
+    border: 2px solid #d3d6da;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: white;
+    transition: all 0.1s ease;
+}
+
+.letter-slot:focus {
+    border-color: var(--accent);
+}
+
+.letter-slot.filled {
+    border-color: #888;
+}
+
+/* Hint letter style (Grayed out/Locked) */
+.hint-slot {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    color: #64748b;
+}
+
+.active-guess-row:focus-within .letter-slot:not(.hint-slot) {
+    border-color: var(--accent);
+}
+
+/* Solved words appearance */
+.solved-word {
+    color: var(--success);
+    letter-spacing: 2px;
+}
+
+.game-title {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 3.5rem;
+    text-align: center;
+    margin: 20px 0;
+    text-transform: uppercase;
+    font-weight: 900;
+    
+    /* 1. Gradient Setup */
+    background: linear-gradient(
+        to right, 
+        #3498db, #2ecc71, #f1c40f, #e67e22, #e74c3c, #3498db
+    );
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    /* 2. COMBINED ANIMATIONS: Shine (5s) and Float (3s) */
+    animation: 
+        shine 5s linear infinite, 
+        float 3s ease-in-out infinite;
+    
+    /* 3. Visual Pop */
+    filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.15));
+}
+
+/* Color shifting logic */
+@keyframes shine {
+    to { background-position: 300% center; }
+}
+
+/* Floating logic */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Mobile responsive fix */
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 2.2rem;
+        margin: 10px 0;
+    }
+}
+
+/* Kid-friendly colorful touch */
+.game-title span:first-child { color: #2ecc71; }
+.game-title span:last-child { color: #9b59b6; }

@@ -1,14 +1,19 @@
 // 1. Data Setup
 const wordChains = [
-  ["HOT", "DOG", "HOUSE", "BOAT"],
-  ["PAPER", "PLANE", "TICKET", "OFFICE"],
-  ["ICE", "CREAM", "SODA", "POP"],
-  ["RAIN", "BOW", "TIE", "BREAKER"],
-  ["SWIMMING", "POOL", "TABLE", "TENNIS"],
-  ["CREDIT", "CARD", "GAME", "NIGHT"],
-  ["CHOP", "STICK", "FIGURE", "SKATER"],
-  ["BOOK", "SHELF", "LIFE", "GUARD"]
-]
+  // Key board, Board walk, Walk way, Way side, Side kick, Kick ball, Ball pit
+  ["KEY", "BOARD", "WALK", "WAY", "SIDE", "KICK", "BALL", "PIT"],
+  ["FIRE", "FIGHTER", "JET", "ENGINE", "ROOM", "SERVICE", "ANIMAL", "CRACKER"],
+  ["SCHOOL", "BUS", "DRIVER", "LICENSE", "PLATE", "NUMBER", "ONE", "DIRECTION"],
+  ["Dragon", "FRUIT", "SALAD", "DRESSING", "ROOM", "SERVICE", "ANIMAL", "KINGDOM"],
+  ["MOVIE", "STAR", "FISH", "TANK", "TOP", "SECRET", "MISSION", "IMPOSSIBLE"],
+  ["GOOD", "NIGHT", "LIGHT", "HOUSE", "WORK", "OUT", "POST", "OFFICE"],
+  ["SLOW", "MOTION", "PICTURE", "FRAME", "WORK", "BENCH", "MARK", "DOWN"],
+  ["AIM", "HIGH", "SCHOOL", "BUS", "STOP", "WATCH", "DOG", "HOUSE"],
+  ["MICHAEL", "JORDAN", "RIVER", "BANK", "NOTE", "BOOK", "CASE", "STUDY"],
+  ["BELLY", "BUTTON", "DOWN", "TOWN", "HALL", "MARK", "UP", "SIDE"],
+  ["MONSTER", "TRUCK", "STOP", "LIGHT", "YEAR", "BOOK", "MARK", "DOWN"],
+  ["SOUR", "DOUGH", "NUT", "SHELL", "SHOCK", "WAVE", "LENGTH", "WISE"]
+];
 
 let shuffledChains = [...wordChains].sort(() => Math.random() - 0.5);
 let chainIndex = 0;
@@ -18,232 +23,201 @@ let revealedCount = 1;
 let timeLeft = 60;
 let timerInterval;
 
-function resetGame() {
-  console.log("Resetting game...");
-  // Update the global gameData variable (remove 'const' from inside here)
-  chainIndex++;
-  document.getElementById('record-message').innerText = '';
+// --- CORE GAME FUNCTIONS ---
 
-  if (chainIndex >= shuffledChains.length) {
-    shuffledChains = [...wordChains].sort(() => Math.random() - 0.5);
-    chainIndex = 0;
-  }
-  gameData = shuffledChains[chainIndex];
-
-  // 2. Reset game state variables
-  currentTargetIndex = 1;
-  revealedCount = 1;
-  timeLeft = 60;
-
-  // 3. Update UI
-  document.getElementById('end-screen').style.display = 'none';
-  document.getElementById('guess-input').disabled = false;
-  document.getElementById('guess-input').value = '';
-  
-  // 4. Restart the logic
-  renderBoard();
-  startTimer();
-  document.getElementById('guess-input').focus();
-}
-
-// 2. The functions that control the UI
 function renderBoard() {
     const board = document.getElementById('game-board');
-    if (!board) {
-        console.error("Could not find game-board element!");
-        return;
-    }
-
-    board.innerHTML = ''; // Clear previous content
+    if (!board) return;
+    board.innerHTML = ''; 
     
     gameData.forEach((word, index) => {
         const div = document.createElement('div');
         div.className = 'word-row';
         
-        if (index === currentTargetIndex - 1) {
-            div.classList.add('sourced-word');
-        }
-
-        if (index === 0 || index === gameData.length - 1 || index < currentTargetIndex) {
-            // Words the player has already solved or the start/end hints
-            div.innerText = word;
-            if (index === 0) {
-                div.classList.add('start-word');
-            }
-        } else if (index === currentTargetIndex) {
-            // The word the player is currently guessing
-            div.classList.add('hidden-word');
+        if (index === currentTargetIndex) {
+            div.classList.add('active-guess-row');
             div.id = 'active-word-row';
-            // Show revealed letters and underscores for the rest
-            const displayed = word.substring(0, revealedCount);
-            const hidden = "_".repeat(word.length - revealedCount);
-            div.innerText = displayed + hidden;
+            
+            // 1. Create the visual slots
+            word.split('').forEach((char, charIndex) => {
+                const slot = document.createElement('div');
+                slot.className = "letter-slot";
+                slot.id = `slot-${charIndex}`;
+
+                // If it's within the revealed hint range, show the hint initially
+                if (charIndex < revealedCount) {
+                    slot.innerText = char;
+                    slot.classList.add('hint-slot');
+                } else {
+                    slot.innerText = "";
+                }
+                div.appendChild(slot);
+            });
+
+            // 2. Create the hidden master input
+            const masterInput = document.createElement('input');
+            masterInput.type = "text";
+            masterInput.id = "master-input";
+            masterInput.className = "master-input";
+            masterInput.maxLength = word.length;
+            masterInput.setAttribute('autocomplete', 'off');
+            masterInput.setAttribute('autocorrect', 'off');
+            masterInput.setAttribute('spellcheck', 'false');
+            
+            // Input starts EMPTY so user types from the first box
+            masterInput.value = "";
+
+            masterInput.addEventListener('input', (e) => {
+                const val = e.target.value.toUpperCase();
+
+                word.split('').forEach((originalChar, i) => {
+                    const slot = document.getElementById(`slot-${i}`);
+                    const userChar = val[i];
+
+                    if (userChar) {
+                        // User has typed something for this slot
+                        slot.innerText = userChar;
+                        slot.classList.add('filled');
+                        // Optional: remove hint styling if user is "overwriting" it
+                        slot.classList.remove('hint-slot');
+                    } else {
+                        // Slot is empty - show hint if it's in the hint range
+                        if (i < revealedCount) {
+                            slot.innerText = originalChar;
+                            slot.classList.add('hint-slot');
+                            slot.classList.remove('filled');
+                        } else {
+                            slot.innerText = "";
+                            slot.classList.remove('filled');
+                        }
+                    }
+                });
+            });
+
+            masterInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const fullGuess = masterInput.value.toUpperCase();
+                    
+                    if (fullGuess === word) {
+                        currentTargetIndex++;
+                        revealedCount = 1;
+                        renderBoard();
+                        if (currentTargetIndex === gameData.length - 1) handleWin();
+                    } else {
+                        div.classList.add('shake');
+                        setTimeout(() => {
+                            div.classList.remove('shake');
+                            timeLeft = Math.max(0, timeLeft - 5);
+                            revealedCount++; 
+                            renderBoard(); 
+                        }, 500);
+                    }
+                }
+            });
+
+            div.appendChild(masterInput);
         } else {
-            // Words further down the chain that aren't reachable yet
-            div.innerText = "???";
+            const isVisible = (index === 0 || index === gameData.length - 1 || index < currentTargetIndex);
+            div.innerText = isVisible ? word : "???";
+            if (index < currentTargetIndex) div.classList.add('solved-word');
+            if (index === 0) div.classList.add('start-word');
         }
         board.appendChild(div);
     });
-    setTimeout(scrollToActiveWord, 100);
+
+    setTimeout(() => {
+        const master = document.getElementById('master-input');
+        if (master) master.focus();
+        scrollToActiveWord();
+    }, 50);
 }
 
-function startTimer() {
-  clearInterval(timerInterval);
-  timeLeft = 60;
+// --- SYSTEM FUNCTIONS ---
 
-  timerInterval = setInterval(() => {
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        showEndScreen("Time's up!", "Better luck next time.");
-        return;
-      }
-      timeLeft--;
-      
-      const timerDisplay = document.getElementById('timer-display');
-      if (timerDisplay) {
-        timerDisplay.innerText = `Time: ${timeLeft}s`;
-        
-        if (timeLeft <= 10) {
-          timerDisplay.classList.add('low-time');
-        } else {
-          timerDisplay.classList.remove('low-time');
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            showEndScreen("Time's up!", "Better luck next time.");
+            return;
         }
-      }
-  }, 1000);
+        timeLeft--;
+        const timerDisplay = document.getElementById('timer-display');
+        if (timerDisplay) {
+            timerDisplay.innerText = `Time: ${timeLeft}s`;
+            if (timeLeft <= 10) timerDisplay.classList.add('low-time');
+            else timerDisplay.classList.remove('low-time');
+        }
+    }, 1000);
+}
+
+function resetGame() {
+    chainIndex = (chainIndex + 1) % shuffledChains.length;
+    gameData = shuffledChains[chainIndex];
+    currentTargetIndex = 1;
+    revealedCount = 1;
+    timeLeft = 60;
+    document.getElementById('end-screen').style.display = 'none';
+    document.getElementById('record-message').innerText = '';
+    renderBoard();
+    startTimer();
+}
+
+function handleWin() {
+    clearInterval(timerInterval);
+    const previousBest = localStorage.getItem('bestTime');
+    let recordText = "";
+    if(!previousBest || timeLeft > parseInt(previousBest)) {
+        localStorage.setItem('bestTime', timeLeft);
+        recordText = "New Personal Best!";
+        updateBestTimeDisplay();
+    }
+    document.getElementById('record-message').innerText = recordText;
+    showEndScreen("Congratulations!", `Chain complete with ${timeLeft}s left!`);
 }
 
 function showEndScreen(title, message) {
-    clearInterval(timerInterval);
-    const endScreen = document.getElementById('end-screen');
-    endScreen.style.display = 'flex';
-
     document.getElementById('end-screen').style.display = 'flex';
     document.getElementById('end-title').innerText = title;
     document.getElementById('end-message').innerText = message;
-    document.getElementById('guess-input').blur();
-
     if (title === "Congratulations!") {
-      console.log("Triggering confetti animation...");
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#3498db', '#27ae60', '#f1c40f'],
-        zIndex: 2000
-      });
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
-  }
-
-// 3. The "Initialization" - This waits for the HTML to be ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("HTML Loaded. Initializing Game...");
-    
-    const input = document.getElementById('guess-input');
-    const startBtn = document.getElementById('start-button');
-    const overlay = document.getElementById('overlay');
-    const endScreen = document.getElementById('end-screen');
-
-    overlay.style.display = 'flex';
-    endScreen.style.display = 'none';
-
-    // Initial draw
-    renderBoard();
-    updateBestTimeDisplay();
-
-    // Start button logic
-    startBtn.addEventListener('click', () => {
-        console.log("Starting game...");
-        overlay.style.display = 'none';
-        timeLeft = 60;
-        startTimer();
-        input.focus();
-    });
-
-    // Listen for guesses
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const guess = input.value.toUpperCase().trim();
-            const actual = gameData[currentTargetIndex];
-
-            if (guess === '') return; // Ignore empty guesses
-
-            if (guess === actual) {
-                // Correct! Move to next word
-                const activeRow = document.getElementById('active-word-row');
-                if (activeRow) activeRow.classList.add('correct-word');
-                
-                input.value = '';
-
-                setTimeout(() => {
-                  currentTargetIndex++;
-                  revealedCount = 1;
-                  renderBoard();
-                  if (currentTargetIndex === gameData.length - 1) {
-                      clearInterval(timerInterval);
-                      handleWin();
-                  }
-                }, 300);
-            } else {
-                // Wrong! Reveal a letter and penalize time
-                input.classList.add('shake');
-                setTimeout(() => input.classList.remove('shake'), 500);
-                if (revealedCount < actual.length) {
-                    revealedCount++;
-                }
-                timeLeft = Math.max(0, timeLeft - 5);
-            }
-            
-            input.value = ''; // Clear input box
-            renderBoard();    // Redraw the list
-        }
-    });
-});
-
-function handleWin() {
-  console.log("Player completed the chain!");
-  const previousBest = localStorage.getItem('bestTime');
-  let recordText = "";
-
-  if(!previousBest || timeLeft > parseInt(previousBest)) {
-    localStorage.setItem('bestTime', timeLeft);
-    recordText = "New Personal Best!";
-    updateBestTimeDisplay();
-  }
-
-  document.getElementById('record-message').innerText = recordText;
-  showEndScreen("Congratulations!", `You completed the chain with ${timeLeft}s left!`);
 }
 
 function scrollToActiveWord() {
-  const activeRow = document.querySelector('.hidden-word');
-  const board = document.getElementById('game-board');
-  
-  if (activeRow && board) {
-    const previousRow = activeRow.previousElementSibling;
-    const target = previousRow || activeRow;
+    const activeRow = document.getElementById('active-word-row');
+    const board = document.getElementById('game-board');
+    
+    if (activeRow && board) {
+        // Find the word directly above the one being guessed
+        const contextRow = activeRow.previousElementSibling;
+        
+        // We want to scroll to the contextRow if it exists, otherwise the activeRow
+        const targetRow = contextRow || activeRow;
 
-    const targetOffset = target.offsetTop - board.offsetTop;
-    board.scrollTo({
-      top: targetOffset - 10,
-      behavior: 'smooth'
-    })
-  }
+        // Calculate the position relative to the board container
+        const targetOffset = targetRow.offsetTop - board.offsetTop;
+
+        board.scrollTo({
+            top: targetOffset - 20, // 20px padding at the top for breathing room
+            behavior: 'smooth'
+        });
+    }
 }
 
 function updateBestTimeDisplay() {
-  const bestTime = localStorage.getItem('bestTime');
-  const display = document.getElementById('best-time-display');
-  if (bestTime) {
-    display.innerText = `Best Time: ${bestTime}s left`;
-  } else {
-    display.innerText = 'Best Time: No Record yet';
-  }
+    const bestTime = localStorage.getItem('bestTime');
+    const display = document.getElementById('best-time-display');
+    if (display) display.innerText = bestTime ? `Best Time: ${bestTime}s left` : 'Best Time: --';
 }
 
-updateBestTimeDisplay();
-
-window.addEventListener('resize', () => {
-  if (document.activeElement.id === 'guess-input') {
-    scrollToActiveWord();
-  }
+document.addEventListener('DOMContentLoaded', () => {
+    updateBestTimeDisplay();
+    document.getElementById('start-button').addEventListener('click', () => {
+        document.getElementById('overlay').style.display = 'none';
+        startTimer();
+        renderBoard();
+    });
 });

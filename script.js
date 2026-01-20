@@ -178,33 +178,52 @@ function handleWin() {
 }
 
 function showEndScreen(title, message) {
+    const endTitle = document.getElementById('end-title');
+    const endMessage = document.getElementById('end-message'); // Get the message element
+    
     document.getElementById('end-screen').style.display = 'flex';
-    document.getElementById('end-title').innerText = title;
-    document.getElementById('end-message').innerText = message;
+
+    // 1. Handle the Title (Your existing logic)
     if (title === "Congratulations!") {
+        endTitle.innerHTML = title.split('').map((char, i) => {
+            return `<span style="--i:${i}">${char}</span>`;
+        }).join('');
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    } else {
+        endTitle.innerText = title;
     }
+
+    endMessage.innerHTML = message;
 }
 
 function scrollToActiveWord() {
     const activeRow = document.getElementById('active-word-row');
     const board = document.getElementById('game-board');
+    const timer = document.getElementById('timer-display');
     
-    if (activeRow && board) {
-        // Find the word directly above the one being guessed
-        const contextRow = activeRow.previousElementSibling;
-        
-        // We want to scroll to the contextRow if it exists, otherwise the activeRow
-        const targetRow = contextRow || activeRow;
+    if (!activeRow || !board) return;
 
-        // Calculate the position relative to the board container
-        const targetOffset = targetRow.offsetTop - board.offsetTop;
+    // 1. Get the word above the active one (the "Context")
+    const contextRow = activeRow.previousElementSibling;
+    // We want to scroll to the context row, unless the timer is the only thing above it
+    const targetRow = (contextRow && contextRow !== timer) ? contextRow : activeRow;
 
-        board.scrollTo({
-            top: targetOffset - 20, // 20px padding at the top for breathing room
-            behavior: 'smooth'
-        });
-    }
+    // 2. Calculate the "Sticky Gap" (how much space the timer takes up)
+    const stickyHeight = timer ? timer.offsetHeight : 0;
+
+    // 3. Calculate distance
+    // targetRect.top is distance from top of viewport
+    // boardRect.top is distance from top of game container
+    const targetRect = targetRow.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect();
+
+    const scrollTarget = (targetRect.top - boardRect.top) + board.scrollTop - stickyHeight - 10;
+
+    // 4. Perform the scroll
+    board.scrollTo({
+        top: scrollTarget,
+        behavior: 'smooth'
+    });
 }
 
 function updateBestTimeDisplay() {

@@ -365,10 +365,9 @@ button {
 
 #end-title {
     font-family: 'Arial Black', sans-serif;
-    font-size: 3rem;
+    font-size: 2rem;
     display: flex;
     justify-content: center;
-    flex-wrap: wrap;
     gap: 2px;
     line-height: 1.5;
     padding: 10px;
